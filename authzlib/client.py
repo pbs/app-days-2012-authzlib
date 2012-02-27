@@ -9,6 +9,7 @@
     :license: BSD
 """
 import urllib2
+from urllib import quote_plus
 try:
     import json
 except ImportError:
@@ -61,7 +62,7 @@ class AuthzClient(object):
         Returns the authenticated consumer as a dict or None if the
         authentication failed.
         """
-        auth_url = "%s/authenticate/%s/" % (self.endpoint_url, url)
+        auth_url = "%s/authenticate/%s/" % (self.endpoint_url, quote_plus(url))
 
         request = _create_request(
             auth_url,
