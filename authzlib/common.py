@@ -5,9 +5,14 @@ def create_request(url,
                     method="GET",
                     body=None,
                     user_agent=None,
-                    content_type=None):
+                    content_type=None,
+                    headers=None):
     """Create a new urllib request with the specified HTTP method."""
-    request = urllib2.Request(url, data=body)
+    if not headers:
+        request = urllib2.Request(url, data=body)
+    else:
+        request = urllib2.Request(url, data=body, headers=headers)
+
     request.get_method = lambda *a: method
 
     if user_agent:
