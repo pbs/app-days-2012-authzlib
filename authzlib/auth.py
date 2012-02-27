@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-    authzlib.client
-    ~~~~~~~~~~~~
+    authzlib.auth
+    ~~~~~~~~~~~~~
 
-    Authz client implementation.
+    Authz client implementation for the authentication and authorization
+    services
 
     :copyright: (c) 2012 by Ion Scerbatiuc
     :license: BSD
@@ -14,6 +15,8 @@ try:
     import json
 except ImportError:
     from simplejson import json
+
+from authzlib.common import create_request, ensure_no_trailing_slash
 
 
 class ObjectConfig(object):
@@ -32,7 +35,7 @@ class ObjectConfig(object):
             setattr(self, key, value)
 
 
-class AuthzClient(object):
+class AuthClient(object):
     """Authz client implementation."""
 
     def __init__(self, config, config_prefix='AUTHZ_'):
@@ -51,7 +54,7 @@ class AuthzClient(object):
         """
         config = ObjectConfig(config)
 
-        self.endpoint_url = _ensure_no_trailing_slash(
+        self.endpoint_url = ensure_no_trailing_slash(
             getattr(config, '%sENDPOINT_URL' % config_prefix))
         self.service = getattr(config, '%sCLIENT_SERVICE' % config_prefix)
         self.user_agent = getattr(config, '%sUSER_AGENT' % config_prefix, None)
@@ -64,7 +67,7 @@ class AuthzClient(object):
         """
         auth_url = "%s/authenticate/%s/" % (self.endpoint_url, quote_plus(url))
 
-        request = _create_request(
+        request = create_request(
             auth_url,
             method=method.upper(),
             body=body,
@@ -83,7 +86,7 @@ class AuthzClient(object):
         auth_url = "%s/authorize/%s/%s/%s/" % (
             self.endpoint_url, consumer_key, self.service, resource_id)
 
-        request = _create_request(
+        request = create_request(
             auth_url, method=action.upper(), user_agent=self.user_agent)
 
         try:
@@ -92,31 +95,3 @@ class AuthzClient(object):
             return False
         else:
             return response.code == 202
-
-
-def _create_request(url,
-                    method="GET",
-                    body=None,
-                    user_agent=None,
-                    content_type=None):
-    """Create a new urllib request with the specified HTTP method."""
-    request = urllib2.Request(url, data=body)
-    request.get_method = lambda *a: method
-
-    if user_agent:
-        request.add_header('User-Agent', user_agent)
-
-    if body:
-        request.add_header('Content-Length', len(body))
-        if content_type:
-            request.add_header('Content-Type', content_type)
-
-    return request
-
-
-def _ensure_no_trailing_slash(url):
-    """Ensure that the specified URL does not ends with a slash."""
-    if url.endswith('/'):
-        return url[:-1]
-
-    return url

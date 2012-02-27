@@ -1,1 +1,2 @@
-from client import AuthzClient
+from auth import AuthClient
+from rest import RestClient

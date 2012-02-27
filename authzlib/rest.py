@@ -14,7 +14,10 @@ try:
 except ImportError:
     from simplejson import json
 
-class AuthzREST(object):
+from authzlib.common import create_request, ensure_no_trailing_slash
+
+
+class RestClient(object):
     """Authz REST API Lib implementation."""
 
     def __init__(self, base_url):
@@ -23,13 +26,13 @@ class AuthzREST(object):
                 base_url - should point to the root of the Authz service
                     (e.g. http://api.pbs.org/authz/api/1.0)
         """
-        self.base_url = _ensure_no_trailing_slash(base_url)
+        self.base_url = ensure_no_trailing_slash(base_url)
 
     def get_consumer_list(self):
         """ Query the Authz API to return a list of Consumer objects
         """
         target_url = "%s/consumers/" % (self.base_url)
-        request = _create_request(target_url)
+        request = create_request(target_url)
         try:
             response = urllib2.urlopen(request)
         except urllib2.HTTPError:
@@ -45,15 +48,15 @@ class AuthzREST(object):
                             rawc['policies'])
             consumers.append(newc)
 
-        return consumers    
-        
+        return consumers
+
     def add_consumer(self, new_consumer):
         """ Add a Authz consumer.
             The only required argument is consumer name
         """
         target_url = "%s/consumers/" % (self.base_url)
         post_body = json.dumps({ "name" : new_consumer.name })
-        request = _create_request(target_url,
+        request = create_request(target_url,
                                   method="POST",
                                   body=post_body,
                                   content_type='application/json')
@@ -84,42 +87,43 @@ class Consumer(object):
         if key:
             self.key = key
         if url:
-            self.url = _ensure_no_trailing_slash(url)
+            self.url = ensure_no_trailing_slash(url)
         if secret:
             self.secret = secret
         if policies:
-            self.policies = _ensure_no_trailing_slash(policies)
+            self.policies = ensure_no_trailing_slash(policies)
 
     def refresh_data(self, key):
         """ Get the latest data from the server -- generally shouldn't
         have to use this
         """
         pass
-    
+
     def update_name(self, new_name):
         """ Function to update the name of the consumer
         """
         pass
-    
+
     def delete(self):
         """ Remove this consumer from the system
         """
         pass
-    
+
     def add_policy(self, Policy):
         """ Used to attach a policy to this consumer
         """
         pass
-    
+
     def get_policy_list(self):
         """ Retrieve the list of policies attached to this consumer
         """
         pass
-            
+
     def __unicode__(self):
         return self.name
     def __str__(self):
         return self.name
+
 
 class Policy(object):
     """ Library representation of the Policy object """
@@ -132,31 +136,3 @@ class Policy(object):
         """
         self.rid = rid
         self.actions = actions
-
-
-def _create_request(url,
-                    method="GET",
-                    body=None,
-                    user_agent=None,
-                    content_type=None):
-    """Create a new urllib request with the specified HTTP method."""
-    request = urllib2.Request(url, data=body)
-    request.get_method = lambda *a: method
-
-    if user_agent:
-        request.add_header('User-Agent', user_agent)
-
-    if body:
-        request.add_header('Content-Length', len(body))
-        if content_type:
-            request.add_header('Content-Type', content_type)
-
-    return request
-
-
-def _ensure_no_trailing_slash(url):
-    """Ensure that the specified URL does not ends with a slash."""
-    if url.endswith('/'):
-        return url[:-1]
-
-    return url
