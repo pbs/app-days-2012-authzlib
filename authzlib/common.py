@@ -1,12 +1,7 @@
 import urllib2
 
 
-def create_request(url,
-                    method="GET",
-                    body=None,
-                    user_agent=None,
-                    content_type=None,
-                    headers=None):
+def create_request(url, method="GET", body=None, user_agent=None, headers=None):
     """Create a new urllib request with the specified HTTP method."""
     if not headers:
         request = urllib2.Request(url, data=body)
@@ -17,11 +12,6 @@ def create_request(url,
 
     if user_agent:
         request.add_header('User-Agent', user_agent)
-
-    if body:
-        request.add_header('Content-Length', len(body))
-        if content_type:
-            request.add_header('Content-Type', content_type)
 
     return request
 

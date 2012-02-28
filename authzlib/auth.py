@@ -59,7 +59,7 @@ class AuthClient(object):
         self.service = getattr(config, '%sCLIENT_SERVICE' % config_prefix)
         self.user_agent = getattr(config, '%sUSER_AGENT' % config_prefix, None)
 
-    def authenticate(self, method, url, body=None, content_type=None, headers=None):
+    def authenticate(self, method, url, body=None, headers=None):
         """Send an authentication request to the authz service.
 
         Returns the authenticated consumer as a dict or None if the
@@ -68,12 +68,8 @@ class AuthClient(object):
         auth_url = "%s/authenticate/%s/" % (self.endpoint_url, quote_plus(url))
 
         request = create_request(
-            auth_url,
-            method=method.upper(),
-            body=body,
-            content_type=content_type,
-            user_agent=self.user_agent,
-            headers=headers)
+            auth_url, method=method.upper(), body=body,
+            user_agent=self.user_agent, headers=headers)
 
         try:
             response = urllib2.urlopen(request)
@@ -88,7 +84,8 @@ class AuthClient(object):
             self.endpoint_url, consumer_key, self.service, resource_id)
 
         request = create_request(
-            auth_url, method=action.upper(), user_agent=self.user_agent)
+            auth_url, method=action.upper(),
+            user_agent=self.user_agent)
 
         try:
             response = urllib2.urlopen(request)
