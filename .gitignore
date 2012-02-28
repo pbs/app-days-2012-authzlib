@@ -3,5 +3,5 @@
 *.egg-info/
 ve/
 dist/
-*.idea
+.idea/
 *.egg
