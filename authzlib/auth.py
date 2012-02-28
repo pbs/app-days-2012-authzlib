@@ -65,7 +65,7 @@ class AuthClient(object):
         Returns the authenticated consumer as a dict or None if the
         authentication failed.
         """
-        auth_url = "%s/authenticate/%s/" % (self.endpoint_url, quote_plus(url))
+        auth_url = "%s/authenticate/%s" % (self.endpoint_url, quote_plus(url, safe='/'))
 
         request = create_request(
             auth_url, method=method.upper(), body=body,
